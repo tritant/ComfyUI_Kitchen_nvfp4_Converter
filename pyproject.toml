@@ -1,0 +1,39 @@
+[project]
+name = "ComfyUI-Zimage-Turbo-nvfp4-converter"
+description = "Convert Z-image_turbo to nvfp4"
+version = "1.0.0"
+license = { file = "LICENSE.txt" }
+
+[project.urls]
+Repository = "https://github.com/tritant/ComfyUI_ZimageTurbo_nvfp4_Converter"
+
+[tool.comfy]
+PublisherId = "tritant"
+DisplayName = "Z-image-Turbo-nvfp4-Converter"
+Icon = ""
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
