@@ -1,4 +1,4 @@
-# ComfyUI Convert to NVFP4
+# ComfyUI Z-image-Turbo to NVFP4 converter
 
 Un nœud simple et ultra-rapide pour convertir Z-image-turbo au format **NVFP4** directement depuis l'interface ComfyUI.
 
