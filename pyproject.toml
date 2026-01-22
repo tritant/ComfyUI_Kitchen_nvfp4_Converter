@@ -5,12 +5,13 @@ version = "1.2.1"
 license = { file = "LICENSE.txt" }
 
 [project.urls]
-Repository = "https://github.com/tritant/ComfyUI_ZimageTurbo_nvfp4_Converter"
+Repository = "https://github.com/tritant/ComfyUI_Kitchen_nvfp4_Converter"
 
 [tool.comfy]
 PublisherId = "tritant"
 DisplayName = "Z-image-Turbo-nvfp4-Converter"
 Icon = ""
+
 
 
 
