@@ -18,8 +18,7 @@ pip install comfy-kitchen
 Allez dans votre dossier `custom_nodes` et clonez ce dépôt (ou via manager) :
 ```bash
 cd custom_nodes
-git clone https://github.com/votre-pseudo/ComfyUI_Convert_to_nvfp4
-
+git clone https://github.com/tritant/ComfyUI_ZimageTurbo_nvfp4_Converter.git
 ```
 
 
