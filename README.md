@@ -3,7 +3,7 @@
 # Mise à jours:
 - Base support Z-Image-Turbo
 - Ajout du support pour Flux.1 (Philippe Joye)
-- Ajout du support pour Flu.1 Fill
+- Ajout du support pour Flux.1 Fill
 ---
 Un nœud ComfyUI haute performance pour convertir vos modèles en NVFP4. Basculez entre les architectures Z-Image, Flux.1, Flux.1-Fill en un clic et profitez de la puissance des Tensor Cores.
 
