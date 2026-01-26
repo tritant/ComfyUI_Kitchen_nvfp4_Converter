@@ -42,7 +42,10 @@ class ConvertToNVFP4:
                 "single_stream_modulation", "double_stream_modulation_img", "double_stream_modulation_txt"
             ]
         elif model_type in ["Qwen Image Edit", "Qwen-Image-2512"]:
-            BLACKLIST = ["img_in", "txt_in", "time_text_embed", "norm_out", "proj_out"]
+            BLACKLIST = ["img_in", "txt_in", "time_text_embed", "norm_out", 
+                         "proj_out", "txt_mlp", "txt_mod", "img_mod.1", "txt_mlp.net.0.proj", 
+                         "txt_mlp.net.2", "txt_mod.1"
+                         ]
         else:
             # Profil Z-Image
             BLACKLIST = ["cap_embedder", "x_embedder", "noise_refiner", "context_refiner", "t_embedder", "final_layer"]
@@ -66,7 +69,7 @@ class ConvertToNVFP4:
                 continue
 
             if v.ndim == 2 and ".weight" in k:
-                #print(f"💎 Quantification : {k}")
+                print(f"💎 Quantification : {k}")
                 
                 base_k_file = k.replace(".weight", "")
                 base_k_meta = base_k_file
