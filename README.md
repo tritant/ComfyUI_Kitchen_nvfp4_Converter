@@ -1,5 +1,5 @@
 # ComfyUI Kitchen NVFP4 Converter
-Please, only use the original files (bf16/fp16, not fp8, merged or not) from comfyui.
+Please, only use the original files (bf16/fp16, not fp8, merged or not) from comfyui. https://huggingface.co/Comfy-Org
 # Mise à jours:
 - Base support Z-Image-Turbo
 - Ajout du support pour Flux.1-dev (Philippe Joye)
