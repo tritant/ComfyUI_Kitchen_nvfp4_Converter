@@ -7,7 +7,7 @@ Please, only use the original files (bf16/fp16, not fp8, fine-tuned/merged or no
 - Ajout du support pour Qwen-image-edit 2511 (Merci Philippe)
 - Ajout du support pour Qwen-image 2512
 - Ajout du support pour Flux.2-dev
-- Ajout du support pour Wan2.2-i2v-hight-low
+- Ajout du support pour Wan2.2-i2v-high-low
 - Ajout du support pour Z-Image-Base
 ---
 Un nœud ComfyUI haute performance pour convertir vos modèles en NVFP4. Basculez entre les architectures Z-Image, Flux.1, Flux.1-Fill, Qwen-image-edit 2511, Qwen-image 2512 et flux.2-dev et plus en un clic et profitez de la puissance des Tensor Cores.
