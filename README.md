@@ -9,7 +9,7 @@ Please, only use the original files (bf16/fp16, not fp8, fine-tuned/merged or no
 - Ajout du support pour Flux.2-dev
 - Ajout du support pour Wan2.2-i2v-high-low
 - Ajout du support pour Z-Image-Base
-- Ajout du support pour Ltx-2-19b  use the dev or distilled version (fine-tuned/merged or not) https://huggingface.co/Lightricks/LTX-2/tree/main
+- Ajout du support pour Ltx-2-19b  use the dev or distilled version (not fp8) https://huggingface.co/Lightricks/LTX-2/tree/main
 ---
 Un nœud ComfyUI haute performance pour convertir vos modèles en NVFP4. Basculez entre les architectures Z-Image, Flux.1, Flux.1-Fill, Qwen-image-edit 2511, Qwen-image 2512 et flux.2-dev et plus en un clic et profitez de la puissance des Tensor Cores.
 
