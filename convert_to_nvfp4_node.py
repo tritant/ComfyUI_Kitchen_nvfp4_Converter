@@ -56,7 +56,7 @@ class ConvertToNVFP4:
             BLACKLIST = ["text_embedding", "time_embedding", "time_projection", "head"]
             FP8_LAYERS = []
         elif model_type in ["Flux.1-dev", "Flux.1-Fill", "Flux.2-dev"]:
-            BLACKLIST = ["txt_attn", "img_in", "txt_in", "time_in", "vector_in", "guidance_in", "final_layer", "class_embedding", "single_stream_modulation", "double_stream_modulation_img", "double_stream_modulation_txt"]
+            BLACKLIST = ["bias", "txt_attn", "img_in", "txt_in", "time_in", "vector_in", "guidance_in", "final_layer", "class_embedding", "single_stream_modulation", "double_stream_modulation_img", "double_stream_modulation_txt"]
             FP8_LAYERS = []
         elif model_type == "Z-Image-Base":
             BLACKLIST = ["adaLN_modulation", "norm", "final_layer", "cap_embedder", "x_embedder", "noise_refiner", "context_refiner", "t_embedder"]
