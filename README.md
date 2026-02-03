@@ -16,7 +16,8 @@ Un nœud ComfyUI haute performance pour convertir vos modèles en NVFP4. Bascule
 
 Ce format permet de diviser la taille des modèles par 3.5 tout en conservant une qualité quasi identique au BF16, tout en profitant des **Tensor Cores** des cartes NVIDIA récentes.
 
-<img width="1068" height="692" alt="Capture d&#39;écran 2026-02-01 110945" src="https://github.com/user-attachments/assets/a5313e1c-3237-40e2-82c7-d7e5069cd1fd" />
+<img width="1139" height="709" alt="image" src="https://github.com/user-attachments/assets/5edd8897-5ad3-4c44-b6b2-9b8fb2b8f63e" />
+
 
 
 ## 🛠️ Installation
