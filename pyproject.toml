@@ -1,7 +1,7 @@
 [project]
 name = "ComfyUI-Kitchen-nvfp4-converter"
 description = "Convert to nvfp4, support Z-image-turbo, flux.1 and more"
-version = "1.9.2"
+version = "1.10.0"
 license = { file = "LICENSE.txt" }
 
 [project.urls]
@@ -11,6 +11,7 @@ Repository = "https://github.com/tritant/ComfyUI_Kitchen_nvfp4_Converter"
 PublisherId = "tritant"
 DisplayName = "Kitchen-nvfp4-Converter"
 Icon = ""
+
 
 
 
