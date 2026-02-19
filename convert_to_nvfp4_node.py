@@ -61,7 +61,7 @@ class ConvertToNVFP4:
             FP8_LAYERS = []
         elif model_type == "Z-Image-Base":
             BLACKLIST = ["adaLN_modulation", "norm", "final_layer", "cap_embedder", "x_embedder", "noise_refiner", "context_refiner", "t_embedder"]
-            FP8_LAYERS = ["attention.out", "layers.0.", "layers.29."]
+            FP8_LAYERS = []
         elif model_type == "Z-Image-Turbo":
             BLACKLIST = ["cap_embedder", "x_embedder", "noise_refiner", "context_refiner", "t_embedder", "final_layer"]
             FP8_LAYERS = []
