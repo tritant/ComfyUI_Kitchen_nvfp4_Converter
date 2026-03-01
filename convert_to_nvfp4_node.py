@@ -144,6 +144,9 @@ class ConvertToNVFP4:
         final_metadata = OrderedDict()
         final_metadata["_quantization_metadata"] = json.dumps(quant_map)
         
+        final_metadata["converted_by"] = "ComfyUI Kitchen NVFP4 Converter"
+        final_metadata["converter_url"] = "https://github.com/tritant/ComfyUI_Kitchen_nvfp4_Converter"
+        
         if model_type == "LTX-2-19b-dev-or-distilled":
             for k, v in temp_diffusers_meta.items():
                 final_metadata[k] = v
