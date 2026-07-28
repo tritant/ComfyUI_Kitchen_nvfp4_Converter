@@ -30,7 +30,8 @@ class ConvertToNVFP4:
                     "Qwen-Image-Edit-2511", 
                     "Qwen-Image-2512", 
                     "Wan2.2-i2v-high-low",
-                    "LTX-2-19b-dev-or-distilled"
+                    "LTX-2-19b-dev-or-distilled",
+                    "Krea2"
                 ], {"default": "Z-Image-Turbo"}),
                 "device": (["cuda", "cpu"], {"default": "cuda"}),
             }
@@ -74,6 +75,9 @@ class ConvertToNVFP4:
                 "transformer_blocks.45.", "transformer_blocks.46.", 
                 "transformer_blocks.47.", "projection", "adaln_single"
             ]
+            FP8_LAYERS = []
+        elif model_type == "Krea2":
+            BLACKLIST = ["first", "last", "tmlp", "tproj", "txtfusion", "txtmlp"]
             FP8_LAYERS = []
         else:
             BLACKLIST = ["cap_embedder", "x_embedder", "noise_refiner", "context_refiner", "t_embedder", "final_layer"]
