@@ -9,9 +9,19 @@ from collections import OrderedDict
 
 try:
     import comfy_kitchen as ck
-    from comfy_kitchen.tensor import TensorCoreNVFP4Layout
+    from comfy_kitchen.tensor import TensorCoreNVFP4Layout, TensorWiseINT8Layout, TensorCoreConvRotW4A4Layout
+    try:
+        from comfy_kitchen.tensor import TensorCoreMXFP8Layout
+        MXFP8_AVAILABLE = True
+    except ImportError:
+        MXFP8_AVAILABLE = False
+        print("⚠️ [Convert-to-NVFP4] MXFP8 indisponible, mettez comfy-kitchen à jour.")
 except ImportError:
     print("⚠️ [Convert-to-NVFP4] comfy-kitchen introuvable.")
+    MXFP8_AVAILABLE = False
+
+CONVROT_GROUPSIZE = 256
+INT4_QUANT_GROUPSIZE = 64
 
 class ConvertToNVFP4:
     @classmethod
@@ -19,7 +29,9 @@ class ConvertToNVFP4:
         return {
             "required": {
                 "model_name": (folder_paths.get_filename_list("diffusion_models"),),
-                "output_filename": ("STRING", {"default": "model-nvfp4"}),
+                "output_filename": ("STRING", {"default": "",
+                    "placeholder": "vide = nom du modele source",
+                    "tooltip": "Le suffixe du format choisi est ajoute automatiquement."}),
                 "model_type": ([
                     "Z-Image-Turbo", 
                     "Z-Image-Base", 
@@ -31,8 +43,16 @@ class ConvertToNVFP4:
                     "Qwen-Image-2512", 
                     "Wan2.2-i2v-high-low",
                     "LTX-2-19b-dev-or-distilled",
-                    "Krea2"
+                    "Krea2",
+                    "ACE-Step",
+                    "Anima",
+                    "Boogu-Image",
+                    "Chroma",
+                    "ERNIE-Image",
+                    "Ideogram-4",
+                    "SeedVR"
                 ], {"default": "Z-Image-Turbo"}),
+                "quant_format": (["NVFP4", "MXFP8", "INT8_CONVROT", "INT4_CONVROT"], {"default": "NVFP4"}),
                 "device": (["cuda", "cpu"], {"default": "cuda"}),
             }
         }
@@ -43,9 +63,19 @@ class ConvertToNVFP4:
     CATEGORY = "Kitchen"
     OUTPUT_NODE = True
 
-    def convert(self, model_name, output_filename, model_type, device):
+    def convert(self, model_name, output_filename, model_type, quant_format, device):
         input_path = folder_paths.get_full_path("diffusion_models", model_name)
-        output_path = os.path.join(os.path.dirname(input_path), f"{output_filename}.safetensors")
+        # Nom de sortie : base choisie (ou nom du modele source) + suffixe du format.
+        suffix = {"NVFP4": "nvfp4", "MXFP8": "mxfp8",
+                  "INT8_CONVROT": "int8_convrot",
+                  "INT4_CONVROT": "int4_convrot"}.get(quant_format, quant_format.lower())
+        base = (output_filename or "").strip()
+        if not base:
+            base = os.path.splitext(os.path.basename(model_name))[0]
+        if base.lower().endswith(".safetensors"):
+            base = base[: -len(".safetensors")]
+        final_name = f"{base}_{suffix}"
+        output_path = os.path.join(os.path.dirname(input_path), f"{final_name}.safetensors")
         
         # --- CONFIGURATION DES PROFILS ---
         if model_type == "Qwen-Image-Edit-2511":
@@ -76,6 +106,27 @@ class ConvertToNVFP4:
                 "transformer_blocks.47.", "projection", "adaln_single"
             ]
             FP8_LAYERS = []
+        elif model_type == "ACE-Step":
+            BLACKLIST = ["bias", "norm", "scale", "final_layer", "proj_out", "head", "text_embedding", "time_embedding", "time_projection", "embedder", "adaln", "t_embedder", "x_embedder", "y_embedder", "project_in", "quantizer", "embed_tokens", "timbre_encoder"]
+            FP8_LAYERS = []
+        elif model_type == "Anima":
+            BLACKLIST = ["bias", "norm", "scale", "llm_adapter", "final_layer", "proj_out", "x_embedder", "t_embedder", "context_embedder"]
+            FP8_LAYERS = []
+        elif model_type == "Boogu-Image":
+            BLACKLIST = ["image_index_embedding", "ref_image_patch_embedder", "norm1.linear", "norm_out.linear_1", "norm_out.linear_2"]
+            FP8_LAYERS = []
+        elif model_type == "Chroma":
+            BLACKLIST = ["bias", "txt_attn", "img_in", "txt_in", "time_in", "vector_in", "guidance_in", "final_layer", "class_embedding", "single_stream_modulation", "double_stream_modulation_img", "double_stream_modulation_txt"]
+            FP8_LAYERS = []
+        elif model_type == "ERNIE-Image":
+            BLACKLIST = ["bias", "norm", "scale", "final_layer", "proj_out", "head", "text_embedding", "time_embedding", "time_projection", "embedder", "adaln", "t_embedder", "x_embedder", "y_embedder", "context_embedder", "single_stream_modulation", "enhancer"]
+            FP8_LAYERS = []
+        elif model_type == "Ideogram-4":
+            BLACKLIST = ["bias", "norm", "scale", "final_layer", "proj_out", "x_embedder", "t_embedder", "context_embedder", "text_embedding", "time_embedding", "modulation", "adaLN", "q_norm", "k_norm", "img_in", "txt_in", "time_in", "vector_in", "guidance_in", "single_stream_modulation", "embed_image_indicator", "embed_text_indicator", "adaln_proj", "input_proj", "llm_cond_proj", "t_embedding"]
+            FP8_LAYERS = []
+        elif model_type == "SeedVR":
+            BLACKLIST = ["bias", "norm", "scale", "final_layer", "proj_out", "pos_emb", "neg_emb", "patch_embed", "pos_embed", "x_embedder", "t_embedder", "context_embedder", "y_embedder", "time_in", "vector_in", "guidance_in", "txt_in", "img_in", "single_stream_modulation", "double_stream_modulation", "vae", "attn.proj_qkv_vid"]
+            FP8_LAYERS = []
         elif model_type == "Krea2":
             BLACKLIST = ["first", "last", "tmlp", "tproj", "txtfusion", "txtmlp"]
             FP8_LAYERS = []
@@ -83,7 +134,7 @@ class ConvertToNVFP4:
             BLACKLIST = ["cap_embedder", "x_embedder", "noise_refiner", "context_refiner", "t_embedder", "final_layer"]
             FP8_LAYERS = []
 
-        print(f"🚀 Mode {model_type} activé")
+        print(f"🚀 Mode {model_type} | Format {quant_format}")
         
         temp_diffusers_meta = {}
         if model_type == "LTX-2-19b-dev-or-distilled":
@@ -131,14 +182,49 @@ class ConvertToNVFP4:
                     if device == "cuda": del v_tensor
                     continue
 
-                print(f"💎 NVFP4 : {k}")
+                print(f"💎 {quant_format} : {k}")
                 try:
-                    qdata, params = TensorCoreNVFP4Layout.quantize(v_tensor)
-                    tensors = TensorCoreNVFP4Layout.state_dict_tensors(qdata, params)
+                    # Selection du layout et des arguments propres a chaque format
+                    if quant_format == "INT8_CONVROT":
+                        layout = TensorWiseINT8Layout
+                        qdata, params = layout.quantize(
+                            v_tensor, is_weight=True, per_channel=True,
+                            convrot=True, convrot_groupsize=CONVROT_GROUPSIZE,
+                            stochastic_rounding=0)
+                        layer_conf = {"format": "int8_tensorwise", "convrot": True,
+                                      "convrot_groupsize": CONVROT_GROUPSIZE}
+                    elif quant_format == "INT4_CONVROT":
+                        layout = TensorCoreConvRotW4A4Layout
+                        qdata, params = layout.quantize(
+                            v_tensor, convrot_groupsize=CONVROT_GROUPSIZE,
+                            quant_group_size=INT4_QUANT_GROUPSIZE,
+                            stochastic_rounding=0, linear_dtype="int4")
+                        layer_conf = {"format": "convrot_w4a4",
+                                      "convrot_groupsize": CONVROT_GROUPSIZE,
+                                      "quant_group_size": INT4_QUANT_GROUPSIZE,
+                                      "linear_dtype": "int4"}
+                    elif quant_format == "MXFP8":
+                        if not MXFP8_AVAILABLE:
+                            raise RuntimeError("MXFP8 indisponible dans cette version de comfy-kitchen")
+                        layout = TensorCoreMXFP8Layout
+                        qdata, params = layout.quantize(v_tensor)
+                        layer_conf = {"format": "mxfp8"}
+                    else:
+                        layout = TensorCoreNVFP4Layout
+                        qdata, params = layout.quantize(v_tensor)
+                        layer_conf = {"format": "nvfp4"}
+
+                    tensors = layout.state_dict_tensors(qdata, params)
                     for suffix, tensor in tensors.items():
-                        new_sd[f"{base_k_file}.weight{suffix}"] = tensor.cpu()
-                    quant_map["layers"][base_k_meta] = {"format": "nvfp4"}
-                except Exception:
+                        # Certains scales sortent en dtypes que safetensors ne sait
+                        # pas serialiser : on les reinterprete en uint8.
+                        if tensor.dtype == torch.float8_e8m0fnu:
+                            new_sd[f"{base_k_file}.weight{suffix}"] = tensor.view(torch.uint8).cpu()
+                        else:
+                            new_sd[f"{base_k_file}.weight{suffix}"] = tensor.cpu()
+                    quant_map["layers"][base_k_meta] = layer_conf
+                except Exception as e:
+                    print(f"⚠️ {k} non quantifiable ({e}) → bf16")
                     new_sd[k] = v.to(dtype=torch.bfloat16)
                 
                 if device == "cuda": del v_tensor
@@ -149,6 +235,7 @@ class ConvertToNVFP4:
         final_metadata["_quantization_metadata"] = json.dumps(quant_map)
         
         final_metadata["converted_by"] = "ComfyUI Kitchen NVFP4 Converter"
+        final_metadata["quant_format"] = quant_format
         final_metadata["converter_url"] = "https://github.com/tritant/ComfyUI_Kitchen_nvfp4_Converter"
         
         if model_type == "LTX-2-19b-dev-or-distilled":
@@ -161,7 +248,7 @@ class ConvertToNVFP4:
         total_bytes = os.path.getsize(output_path)
         print(f"✅ Terminé. Taille finale : {round(total_bytes / (1024**3), 2)} Go")
         
-        return (f"Succès ({model_type}) : {output_filename}.safetensors",)
+        return (f"Succès ({model_type} / {quant_format}) : {final_name}.safetensors",)
 
 NODE_CLASS_MAPPINGS = {"ConvertToNVFP4": ConvertToNVFP4}
-NODE_DISPLAY_NAME_MAPPINGS = {"ConvertToNVFP4": "🍳 Kitchen NVFP4 Converter"}
+NODE_DISPLAY_NAME_MAPPINGS = {"ConvertToNVFP4": "🍳 Kitchen Quant Converter"}
