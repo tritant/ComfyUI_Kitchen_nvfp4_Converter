@@ -1,7 +1,7 @@
 [project]
 name = "ComfyUI-Kitchen-nvfp4-converter"
-description = "Convert to nvfp4, support Z-image-turbo, flux.1 and more"
-version = "1.11.0"
+description = "Quantize diffusion models to NVFP4, MXFP8, INT8 ConvRot or INT4 ConvRot using ComfyUI's internal kitchen. Per-architecture profiles keep sensitive layers in bf16. Supports Krea 2, Z-Image, Flux 1/2, Qwen-Image, Wan, LTX-2, Chroma, Ideogram 4, ERNIE, Anima, ACE-Step, SeedVR and Boogu."
+version = "2.0.0"
 license = { file = "LICENSE.txt" }
 
 [project.urls]
@@ -9,53 +9,5 @@ Repository = "https://github.com/tritant/ComfyUI_Kitchen_nvfp4_Converter"
 
 [tool.comfy]
 PublisherId = "tritant"
-DisplayName = "Kitchen-nvfp4-Converter"
+DisplayName = "Kitchen Quant Converter"
 Icon = ""
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
