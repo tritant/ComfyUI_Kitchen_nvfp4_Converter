@@ -50,6 +50,7 @@ class ConvertToNVFP4:
                     "Chroma",
                     "ERNIE-Image",
                     "Ideogram-4",
+                    "MiniMax-H3",
                     "SeedVR"
                 ], {"default": "Z-Image-Turbo"}),
                 "quant_format": (["NVFP4", "MXFP8", "INT8_CONVROT", "INT4_CONVROT"], {"default": "NVFP4"}),
@@ -123,6 +124,9 @@ class ConvertToNVFP4:
             FP8_LAYERS = []
         elif model_type == "Ideogram-4":
             BLACKLIST = ["bias", "norm", "scale", "final_layer", "proj_out", "x_embedder", "t_embedder", "context_embedder", "text_embedding", "time_embedding", "modulation", "adaLN", "q_norm", "k_norm", "img_in", "txt_in", "time_in", "vector_in", "guidance_in", "single_stream_modulation", "embed_image_indicator", "embed_text_indicator", "adaln_proj", "input_proj", "llm_cond_proj", "t_embedding"]
+            FP8_LAYERS = []
+        elif model_type == "MiniMax-H3":
+            BLACKLIST = ["bias", "norm", "adaln_proj", "adaln_t_table", "condition_proj", "final_layer", "token_refiner", "patch_proj", "rope"]
             FP8_LAYERS = []
         elif model_type == "SeedVR":
             BLACKLIST = ["bias", "norm", "scale", "final_layer", "proj_out", "pos_emb", "neg_emb", "patch_embed", "pos_embed", "x_embedder", "t_embedder", "context_embedder", "y_embedder", "time_in", "vector_in", "guidance_in", "txt_in", "img_in", "single_stream_modulation", "double_stream_modulation", "vae", "attn.proj_qkv_vid"]
