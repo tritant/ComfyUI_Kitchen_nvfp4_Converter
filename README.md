@@ -7,7 +7,7 @@ Please, only use the original files (bf16/fp16, not fp8, fine-tuned/merged or no
 ## v2.0.0 — Multi-formats
 - **Nouveaux formats de quantification** : le nœud ne fait plus uniquement du NVFP4. Un menu `quant_format` permet désormais de choisir entre **NVFP4**, **MXFP8**, **INT8_CONVROT** et **INT4_CONVROT**.
 - **Nom de sortie automatique** : le suffixe du format est ajouté au fichier (`mon_modele_int8_convrot.safetensors`). Champ laissé vide = le nom du modèle source est repris. Plus besoin de renommer entre deux conversions.
-- **Nouveaux profils** : ACE-Step, Anima, Boogu-Image, Chroma, ERNIE-Image, Ideogram-4, SeedVR.
+- **Nouveaux profils** : Minimax h3, ACE-Step, Anima, Boogu-Image, Chroma, ERNIE-Image, Ideogram-4, SeedVR.
 - Message d'erreur explicite si un format n'est pas disponible dans la version installée de comfy-kitchen.
 
 ## Historique
