@@ -16,12 +16,33 @@ try:
     except ImportError:
         MXFP8_AVAILABLE = False
         print("⚠️ [Convert-to-NVFP4] MXFP8 indisponible, mettez comfy-kitchen à jour.")
+    try:
+        from comfy_kitchen.tensor import AsymW4A8Int8Layout
+        W4A8_AVAILABLE = True
+    except ImportError:
+        W4A8_AVAILABLE = False
+        print("⚠️ [Convert-to-NVFP4] W4A8 indisponible, mettez comfy-kitchen à jour.")
 except ImportError:
     print("⚠️ [Convert-to-NVFP4] comfy-kitchen introuvable.")
     MXFP8_AVAILABLE = False
+    W4A8_AVAILABLE = False
 
 CONVROT_GROUPSIZE = 256
 INT4_QUANT_GROUPSIZE = 64
+W4A8_GROUPSIZE = 16
+
+
+def _pick_convrot_groupsize(k, preferred=CONVROT_GROUPSIZE):
+    """Plus grand groupsize ConvRot divisant K.
+
+    Le layout W4A8 exige K % convrot_groupsize == 0. Toutes les couches
+    ne sont pas divisibles par 256 (ex. K=2688 sur MiniMax H3), on
+    redescend donc par paliers plutot que d'echouer.
+    """
+    for gs in (preferred, 128, 64, 32, 16):
+        if gs <= k and k % gs == 0:
+            return gs
+    return None
 
 class ConvertToNVFP4:
     @classmethod
@@ -53,7 +74,7 @@ class ConvertToNVFP4:
                     "MiniMax-H3",
                     "SeedVR"
                 ], {"default": "Z-Image-Turbo"}),
-                "quant_format": (["NVFP4", "MXFP8", "INT8_CONVROT", "INT4_CONVROT"], {"default": "NVFP4"}),
+                "quant_format": (["NVFP4", "MXFP8", "INT8_CONVROT", "INT4_CONVROT", "W4A8_INT8"], {"default": "NVFP4"}),
                 "device": (["cuda", "cpu"], {"default": "cuda"}),
             }
         }
@@ -207,6 +228,23 @@ class ConvertToNVFP4:
                                       "convrot_groupsize": CONVROT_GROUPSIZE,
                                       "quant_group_size": INT4_QUANT_GROUPSIZE,
                                       "linear_dtype": "int4"}
+                    elif quant_format == "W4A8_INT8":
+                        if not W4A8_AVAILABLE:
+                            raise RuntimeError("W4A8 indisponible dans cette version de comfy-kitchen")
+                        # K doit etre divisible par convrot_groupsize : on prend
+                        # le plus grand palier valide pour cette couche.
+                        k_dim = v_tensor.shape[1]
+                        cgs = _pick_convrot_groupsize(k_dim)
+                        if cgs is None or k_dim % 16 != 0:
+                            raise ValueError(f"K={k_dim} incompatible W4A8 (doit etre multiple de 16)")
+                        layout = AsymW4A8Int8Layout
+                        qdata, params = layout.quantize(
+                            v_tensor, group_size=W4A8_GROUPSIZE,
+                            convrot_groupsize=cgs, symmetric=True,
+                            codebook=True, stochastic_rounding=0)
+                        layer_conf = {"format": "asym_w4a8_int8",
+                                      "group_size": W4A8_GROUPSIZE,
+                                      "convrot_groupsize": cgs}
                     elif quant_format == "MXFP8":
                         if not MXFP8_AVAILABLE:
                             raise RuntimeError("MXFP8 indisponible dans cette version de comfy-kitchen")
@@ -224,6 +262,9 @@ class ConvertToNVFP4:
                         # pas serialiser : on les reinterprete en uint8.
                         if tensor.dtype == torch.float8_e8m0fnu:
                             new_sd[f"{base_k_file}.weight{suffix}"] = tensor.view(torch.uint8).cpu()
+                        elif tensor.dtype in (torch.float8_e4m3fn, torch.float8_e5m2):
+                            # passage par uint8 pour garantir la contiguite
+                            new_sd[f"{base_k_file}.weight{suffix}"] = tensor.view(torch.uint8).cpu().view(tensor.dtype)
                         else:
                             new_sd[f"{base_k_file}.weight{suffix}"] = tensor.cpu()
                     quant_map["layers"][base_k_meta] = layer_conf
